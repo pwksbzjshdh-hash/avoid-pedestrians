@@ -1,0 +1,561 @@
+            ```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> be careful</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0f7fa, #f5f5f5);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #startScreen {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            max-width: 90%;
+            width: 400px;
+        }
+
+        #startScreen h1 {
+            color: #263238;
+            margin-bottom: 1.5rem;
+            font-size: 2.2rem;
+        }
+
+        #highScoreDisplay {
+            color: #d32f2f;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+
+        #playButton {
+            background: #e53935;
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.4rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(229, 57, 53, 0.4);
+        }
+
+        #playButton:hover {
+            background: #d32f2f;
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(229, 57, 53, 0.6);
+        }
+
+        #gameContainer {
+            display: none;
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 80vh;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        #road {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #333;
+            overflow: hidden;
+        }
+
+        .grass {
+            position: absolute;
+            width: 10%;
+            height: 100%;
+            background: linear-gradient(to right, #2e7d32, #4caf50);
+        }
+
+        .grass.left {
+            left: 0;
+        }
+
+        .grass.right {
+            right: 0;
+        }
+
+        #car {
+            position: absolute;
+            width: 45px;
+            height: 75px;
+            background: linear-gradient(135deg, #ff5722, #ff7043);
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 8px;
+            z-index: 10;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2px;
+        }
+
+        .car-top {
+            width: 100%;
+            height: 25px;
+            background: #212121;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .car-body {
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(135deg, #ff5722, #ff7043);
+            border-radius: 0 0 6px 6px;
+            position: relative;
+        }
+
+        .car-window {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            height: 12px;
+            background: #87CEEB;
+            border-radius: 3px;
+        }
+
+        .car-light {
+            position: absolute;
+            width: 6px;
+            height: 3px;
+            background: #FFD700;
+        }
+
+        .car-light.front-left {
+            top: 2px;
+            left: 2px;
+        }
+
+        .car-light.front-right {
+            top: 2px;
+            right: 2px;
+        }
+
+        .car-light.rear-left {
+            bottom: 2px;
+            left: 2px;
+            background: #ff0000;
+        }
+
+        .car-light.rear-right {
+            bottom: 2px;
+            right: 2px;
+            background: #ff0000;
+        }
+
+        .pedestrian {
+            position: absolute;
+            width: 35px;
+            height: 50px;
+            background: #9c27b0;
+            border-radius: 50% 50% 0 0;
+            z-index: 5;
+        }
+
+        #xpDisplay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            z-index: 20;
+        }
+
+        #highScoreInGame {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #ffd700;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            z-index: 20;
+        }
+
+        .xpFeedback {
+            position: absolute;
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 1.2rem;
+            z-index: 15;
+            animation: floatUp 1s forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-50px); }
+        }
+
+        #gameOverScreen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+            color: white;
+        }
+
+        #gameOverText {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: #e53935;
+            text-shadow: 0 0 10px rgba(229, 57, 53, 0.7);
+        }
+
+        #finalScore {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        #newHighScore {
+            font-size: 1.3rem;
+            color: #ffd700;
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+            display: none;
+        }
+
+        #playAgainButton {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 14px 36px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #playAgainButton:hover {
+            background: #43a047;
+            transform: scale(1.05);
+        }
+
+        .roadLine {
+            position: absolute;
+            width: 8px;
+            height: 40px;
+            background: white;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: roadMove 0.8s linear infinite;
+        }
+
+        @keyframes roadMove {
+            0% { top: -40px; }
+            100% { top: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div id="startScreen">
+        <h1>لعبة تفادي المشاة</h1>
+        <div id="highScoreDisplay">أعلى نتيجة: 0</div>
+        <button id="playButton">Play</button>
+    </div>
+
+    <div id="gameContainer">
+        <div id="road">
+            <div class="grass left"></div>
+            <div class="grass right"></div>
+            <div id="car">
+                <div class="car-top">
+                    <div class="car-window"></div>
+                </div>
+                <div class="car-body">
+                    <div class="car-light front-left"></div>
+                    <div class="car-light front-right"></div>
+                    <div class="car-light rear-left"></div>
+                    <div class="car-light rear-right"></div>
+                </div>
+            </div>
+            <div id="xpDisplay">XP: 0</div>
+            <div id="highScoreInGame">أعلى: 0</div>
+            <div id="gameOverScreen">
+                <div id="gameOverText">You fucken loser!</div>
+                <div id="finalScore">نتيجتك: 0</div>
+                <div id="newHighScore"></div>
+                <button id="playAgainButton">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // العناصر
+        const startScreen = document.getElementById('startScreen');
+        const gameContainer = document.getElementById('gameContainer');
+        const playButton = document.getElementById('playButton');
+        const playAgainButton = document.getElementById('playAgainButton');
+        const car = document.getElementById('car');
+        const road = document.getElementById('road');
+        const xpDisplay = document.getElementById('xpDisplay');
+        const highScoreDisplay = document.getElementById('highScoreDisplay');
+        const highScoreInGame = document.getElementById('highScoreInGame');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScore = document.getElementById('finalScore');
+        const newHighScore = document.getElementById('newHighScore');
+
+        // إدارة النتائج العالية باستخدام sessionStorage
+        let highScore = 0;
+        try {
+            highScore = parseInt(sessionStorage.getItem('highScore')) || 0;
+        } catch (e) {
+            highScore = 0;
+        }
+        
+        highScoreDisplay.textContent = `أعلى نتيجة: ${highScore}`;
+        highScoreInGame.textContent = `أعلى: ${highScore}`;
+
+        // المتغيرات
+        let gameRunning = false;
+        let xp = 0;
+        let carPosition = 50;
+        let pedestrianSpeed = 2.5;
+        let gameSpeed = 1.2;
+        let lastPedestrianTime = 0;
+        let lastSpeedIncrease = 0;
+        let animationId = null;
+        let lastTime = 0;
+
+        // بدء اللعبة
+        playButton.addEventListener('click', startGame);
+        playAgainButton.addEventListener('click', startGame);
+
+        function startGame() {
+            // إعادة تعيين المتغيرات
+            gameRunning = true;
+            xp = 0;
+            carPosition = 50;
+            pedestrianSpeed = 2.5;
+            gameSpeed = 1.2;
+            lastPedestrianTime = 0;
+            lastSpeedIncrease = 0;
+            
+            // تحديث العرض
+            xpDisplay.textContent = `XP: ${xp}`;
+            car.style.left = `${carPosition}%`;
+            
+            // إخفاء شاشة البداية وعرض اللعبة
+            startScreen.style.display = 'none';
+            gameContainer.style.display = 'block';
+            gameOverScreen.style.display = 'none';
+            
+            // إزالة المشاة السابقة
+            document.querySelectorAll('.pedestrian').forEach(p => p.remove());
+            document.querySelectorAll('.roadLine').forEach(l => l.remove());
+            
+            // بدء اللعبة
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            lastTime = performance.now();
+            gameLoop(lastTime);
+        }
+
+        // التحكم بالسيارة
+        document.addEventListener('keydown', (e) => {
+            if (!gameRunning) return;
+            
+            if (e.key === 'ArrowLeft') {
+                carPosition = Math.max(10 + 4, carPosition - 6);
+            } else if (e.key === 'ArrowRight') {
+                carPosition = Math.min(90 - 4, carPosition + 6);
+            }
+            car.style.left = `${carPosition}%`;
+        });
+
+        // دعم اللمس
+        let touchStartX = 0;
+        gameContainer.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        });
+
+        gameContainer.addEventListener('touchmove', (e) => {
+            if (!gameRunning) return;
+            e.preventDefault();
+            const touchX = e.touches[0].clientX;
+            const diff = touchX - touchStartX;
+            const containerRect = gameContainer.getBoundingClientRect();
+            const containerWidth = containerRect.width;
+            
+            // تحويل الفرق إلى نسبة
+            const movePercent = (diff / containerWidth) * 100;
+            carPosition = Math.max(10 + 4, Math.min(90 - 4, 50 + movePercent));
+            car.style.left = `${carPosition}%`;
+        });
+
+        // دالة اللعبة الرئيسية
+        function gameLoop(timestamp) {
+            if (!gameRunning) return;
+            
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+            
+            // إنشاء خطوط الطريق
+            if (Math.random() < 0.03) {
+                const roadLine = document.createElement('div');
+                roadLine.className = 'roadLine';
+                road.appendChild(roadLine);
+                
+                // إزالة الخط بعد انتهاء الرسوم المتحركة
+                setTimeout(() => {
+                    if (roadLine.parentNode) {
+                        roadLine.parentNode.removeChild(roadLine);
+                    }
+                }, 800);
+            }
+            
+            // إنشاء مشاة جدد
+            if (timestamp - lastPedestrianTime > 800) {
+                createPedestrian();
+                lastPedestrianTime = timestamp;
+            }
+            
+            // تحريك المشاة
+            movePedestrians(deltaTime);
+            
+            // زيادة السرعة كل 8 ثوانٍ
+            if (timestamp - lastSpeedIncrease > 8000) {
+                gameSpeed += 0.25;
+                lastSpeedIncrease = timestamp;
+            }
+            
+            // متابعة الحلقة
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        function createPedestrian() {
+            const pedestrian = document.createElement('div');
+            pedestrian.className = 'pedestrian';
+            
+            // تحديد موضع عشوائي على الطريق (تجنب العشب)
+            const containerRect = gameContainer.getBoundingClientRect();
+            const roadWidth = containerRect.width;
+            const grassWidth = 0.10 * roadWidth;
+            
+            const minLeft = grassWidth + 10;
+            const maxLeft = roadWidth - grassWidth - 35;
+            const randomLeft = minLeft + Math.random() * (maxLeft - minLeft);
+            
+            pedestrian.style.left = `${(randomLeft / roadWidth) * 100}%`;
+            pedestrian.style.top = '-50px';
+            
+            road.appendChild(pedestrian);
+        }
+
+        function movePedestrians(deltaTime) {
+            const pedestrians = document.querySelectorAll('.pedestrian');
+            const carRect = car.getBoundingClientRect();
+            
+            pedestrians.forEach(pedestrian => {
+                const currentTop = parseFloat(pedestrian.style.top) || -50;
+                const newTop = currentTop + (pedestrianSpeed * gameSpeed * deltaTime) / 16;
+                pedestrian.style.top = `${newTop}px`;
+                
+                // إزالة المشاة التي خرجت من الشاشة
+                if (newTop > window.innerHeight) {
+                    pedestrian.remove();
+                    // إضافة XP عند تفادي المشاة
+                    addXP(1);
+                }
+                
+                // التحقق من الاصطدام
+                if (gameRunning) {
+                    const pedRect = pedestrian.getBoundingClientRect();
+                    if (
+                        carRect.left < pedRect.right &&
+                        carRect.right > pedRect.left &&
+                        carRect.top < pedRect.bottom &&
+                        carRect.bottom > pedRect.top
+                    ) {
+                        gameOver();
+                    }
+                }
+            });
+        }
+
+        function addXP(amount) {
+            xp += amount;
+            xpDisplay.textContent = `XP: ${xp}`;
+            
+            // عرض تغذية مرتدة
+            const feedback = document.createElement('div');
+            feedback.className = 'xpFeedback';
+            feedback.textContent = 'Avoided!';
+            feedback.style.left = `${carPosition}%`;
+            feedback.style.top = '60%';
+            road.appendChild(feedback);
+            
+            setTimeout(() => {
+                if (feedback.parentNode) {
+                    feedback.parentNode.removeChild(feedback);
+                }
+            }, 1000);
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            finalScore.textContent = `نتيجتك: ${xp}`;
+            
+            // التحقق من أعلى نتيجة
+            if (xp > highScore) {
+                highScore = xp;
+                try {
+                    sessionStorage.setItem('highScore', highScore);
+                } catch (e) {
+                    // تجاهل الأخطاء في حالة عدم دعم sessionStorage
+                }
+                newHighScore.textContent = '🎉 سجلت أعلى نتيجة جديدة! 🎉';
+                newHighScore.style.display = 'block';
+                highScoreDisplay.textContent = `أعلى نتيجة: ${highScore}`;
+                highScoreInGame.textContent = `أعلى: ${highScore}`;
+            } else {
+                newHighScore.style.display = 'none';
+            }
+            
+            gameOverScreen.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
+```
